@@ -43,7 +43,7 @@ class PolicyFactory(ABC):
 
 class AutoPolicyFactory(PolicyFactory):
     insurance_type, code, term_months = InsuranceType.AUTO, "AUTO", 12
-    min_insured_amount = Decimal("100000")
+    min_insured_amount = Decimal("300000")  # КАСКО
 
     def create_policy(self, client_id, product_id, insured_amount, start_date) -> Policy:
         return self._build(client_id, product_id, insured_amount, start_date)
@@ -58,7 +58,7 @@ class HealthPolicyFactory(PolicyFactory):
 
 
 class PropertyPolicyFactory(PolicyFactory):
-    insurance_type, code, term_months = InsuranceType.PROPERTY, "PRP", 36
+    insurance_type, code, term_months = InsuranceType.PROPERTY, "PRP", 36  # многолетний полис имущества??
     min_insured_amount = Decimal("300000")
 
     def create_policy(self, client_id, product_id, insured_amount, start_date) -> Policy:
