@@ -53,7 +53,7 @@ class ServiceClient:
 
     def request(self, method: str, path: str, **kwargs) -> httpx.Response:
         if not self.breaker.allow():
-            raise ServiceUnavailable(f"Сервис «{self.name}» временно недоступен (выключатель разомкнут)")
+            raise ServiceUnavailable(f"Сервис «{self.name}» временно недоступен")
         headers = kwargs.pop("headers", {}) or {}
         headers.setdefault(REQUEST_ID_HEADER, current_request_id.get())
         try:
