@@ -25,7 +25,7 @@ class PremiumCalculator(ABC):
 
 
 class BasePremiumCalculator(PremiumCalculator):
-    """Премия = страховая сумма × годовой тариф × срок в годах."""
+    """Премия = страховая сумма * годовой тариф * срок в годах."""
 
     def calculate(self, request: PremiumRequest) -> Decimal:
         value = request.insured_amount * request.base_rate * Decimal(request.term_months) / Decimal(12)
