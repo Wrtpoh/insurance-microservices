@@ -1,0 +1,65 @@
+# Запуск всей системы: docker compose up --build
+# Шлюз: http://localhost:8000 (остальные сервисы наружу не публикуются, доступны только внутри сети).
+# JWT_SECRET и пароли пользователей задайте в файле .env (см. .env.example).
+x-service: &service
+  build: .
+  restart: unless-stopped
+
+services:
+  client-service:
+    <<: *service
+    command: uvicorn client_service.main:create_app --factory --host 0.0.0.0 --port 8000
+    environment:
+      CLIENT_DB_URL: sqlite:////data/client.db
+    volumes: [client-data:/data]
+
+  product-service:
+    <<: *service
+    command: uvicorn product_service.main:create_app --factory --host 0.0.0.0 --port 8000
+    environment:
+      PRODUCT_DB_URL: sqlite:////data/product.db
+    volumes: [product-data:/data]
+
+  policy-service:
+    <<: *service
+    command: uvicorn policy_service.main:create_app --factory --host 0.0.0.0 --port 8000
+    environment:
+      POLICY_DB_URL: sqlite:////data/policy.db
+      CLIENT_SERVICE_URL: http://client-service:8000
+      PRODUCT_SERVICE_URL: http://product-service:8000
+    volumes: [policy-data:/data]
+    depends_on: [client-service, product-service]
+
+  claim-service:
+    <<: *service
+    command: uvicorn claim_service.main:create_app --factory --host 0.0.0.0 --port 8000
+    environment:
+      CLAIM_DB_URL: sqlite:////data/claim.db
+      POLICY_SERVICE_URL: http://policy-service:8000
+    volumes: [claim-data:/data]
+    depends_on: [policy-service]
+
+  gateway:
+    <<: *service
+    command: uvicorn gateway.main:create_app --factory --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+    environment:
+      GATEWAY_DB_URL: sqlite:////data/gateway.db
+      CLIENT_SERVICE_URL: http://client-service:8000
+      PRODUCT_SERVICE_URL: http://product-service:8000
+      POLICY_SERVICE_URL: http://policy-service:8000
+      CLAIM_SERVICE_URL: http://claim-service:8000
+      JWT_SECRET: ${JWT_SECRET:?задайте JWT_SECRET в .env}
+      SEED_PASSWORD_ADMIN: ${SEED_PASSWORD_ADMIN:-admin123}
+      SEED_PASSWORD_MANAGER: ${SEED_PASSWORD_MANAGER:-manager123}
+      SEED_PASSWORD_AGENT: ${SEED_PASSWORD_AGENT:-agent123}
+      SEED_PASSWORD_ADJUSTER: ${SEED_PASSWORD_ADJUSTER:-adjuster123}
+    volumes: [gateway-data:/data]
+    depends_on: [client-service, product-service, policy-service, claim-service]
+
+volumes:
+  client-data:
+  product-data:
+  policy-data:
+  claim-data:
+  gateway-data:
