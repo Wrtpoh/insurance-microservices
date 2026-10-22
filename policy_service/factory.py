@@ -58,7 +58,7 @@ class HealthPolicyFactory(PolicyFactory):
 
 
 class PropertyPolicyFactory(PolicyFactory):
-    insurance_type, code, term_months = InsuranceType.PROPERTY, "PRP", 36  # многолетний полис имущества??
+    insurance_type, code, term_months = InsuranceType.PROPERTY, "PRP", 12
     min_insured_amount = Decimal("300000")
 
     def create_policy(self, client_id, product_id, insured_amount, start_date) -> Policy:
